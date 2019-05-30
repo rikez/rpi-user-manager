@@ -3,7 +3,6 @@ FROM node:10-stretch-slim AS dependencies
 
 WORKDIR /app
 COPY package*.json ./
-COPY keys keys
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y ca-certificates && update-ca-certificates && \
