@@ -1,4 +1,5 @@
 'use strict';
+const { User } = require('./model');
 
 /**
  * HTTP Handler for the raspberry users.
@@ -7,13 +8,13 @@
 class UserController {
   /**
    * Creates an instance of UserController.
-   * @param {} repository
+   * 
+   * @param {*} kafkaProducer
    * @memberof UserController
    */
-  constructor(repository) {
-    this._repository = repository;
+  constructor(kafkaProducer) {
+    this._producer = kafkaProducer;
   }
-
   /**
    * Creates a new user
    * @method POST
@@ -24,9 +25,19 @@ class UserController {
    */
   async create(req, res, next) {
     try {
-      const user = await this._repository.create(req.body);
+      const user = new User(req.body);
+      const result = await user.save();
 
-      res.status(201).json(user);
+      this._producer.publish('user-subscription', { 
+        operation: 'create', 
+        userId: result.email, 
+        thresholdHumidity: result.device.thresholdHumidity, 
+        thresholdTemperature: result.device.thresholdTemperature, 
+        phone: result.phone, 
+        deviceId: result.device.deviceId 
+      });
+
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -42,7 +53,7 @@ class UserController {
    */
   async getById(req, res, next) {
     try {
-      const user = await this._repository.getById(req.params.id);
+      const user = await User.findById(req.params.id);
 
       res.status(200).json(user);
     } catch (error) {
@@ -60,7 +71,7 @@ class UserController {
    */
   async getAll(req, res, next) {
     try {
-      const users = await this._repository.getAll();
+      const users = await User.find({});
 
       res.status(200).json(users);
     } catch (error) {
@@ -78,9 +89,27 @@ class UserController {
    */
   async update(req, res, next) {
     try {
-      const updated = await this._repository.update(req.params.id, req.body);
+      const updated = await User.findByIdAndUpdate(req.params.id, req.body);
 
       res.status(200).json(updated);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete user.
+   *
+   * @param {*} req
+   * @param {*} res
+   * @memberof UserController
+   */
+  async delete(req, res, next) {
+    try {
+      const deleted = await User.findByIdAndRemove(req.params.id);
+      this._producer.publish('user-subscription', { operation: 'delete', userId: deleted.email });
+
+      res.status(200).json(deleted);
     } catch (error) {
       next(error);
     }

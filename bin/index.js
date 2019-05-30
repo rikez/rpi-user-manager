@@ -1,10 +1,10 @@
 'use strict';
 
 const VError = require('verror');
-
+const mongoose = require('mongoose');
+const config = require('../src/config');
 const registerContainer = require('../src/infra/container');
 const logger = require('../src/infra/logger');
-
 
 /**
  * A Handler for the microservice shutdown
@@ -52,27 +52,19 @@ async function main() {
     producer.on('info', (msg, args) => {
       logger.warn({ args }, msg);
     });
-    producer.on('delivery-report', (msg, report) => {
-      logger.info({ report }, msg);
-    });
-    producer.on('delivery-report-error', (error) => {
-      logger.error(new VError(error, 'Unexpected error on the kafka-producer message delivery'));
+    producer.on('user-subscription', (msg, args) => {
+      logger.info({ args }, msg);
     });
     await producer.init();
 
     // Starting the mongo-client
-    const mongoClient = container.resolve('mongoClient');
-    mongoClient.on('error', (error) => {
-      logger.error(new VError(error, 'Unexpected error on the mongo-client'));
-      process.kill(process.pid, 'SIGINT');
+    mongoose.connect(config.MONGO_URI, (err) => {
+      if (err) {
+        logger.error(err);
+      } else {
+        logger.info('Mongo connected succesfully');
+      }
     });
-    mongoClient.on('warn', (error) => {
-      logger.warn(new VError(error, 'Unexpected warn on the mongo-client'));
-    });
-    mongoClient.on('info', (message) => {
-      logger.info(message);
-    });
-    await mongoClient.init();
 
     // Starting the express http-server
     const express = container.resolve('express');
@@ -91,3 +83,5 @@ async function main() {
     process.kill(process.pid, 'SIGINT');
   }
 }
+
+main();

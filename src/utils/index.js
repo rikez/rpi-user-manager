@@ -1,6 +1,6 @@
 'use strict';
 
-const HttpException = require('./exceptions/http-exception');
+const HttpException = require('./exceptions/http');
 
 
 /**

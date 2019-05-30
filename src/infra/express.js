@@ -27,7 +27,7 @@ class Express extends EventEmitter {
    * @param {Function} auth
    * @memberof Express
    */
-  constructor(port, logger, getRoutes, handlers, auth) {
+  constructor(port, logger, getRoutes, handlers) {
     super();
 
     this.app = express();
@@ -35,7 +35,6 @@ class Express extends EventEmitter {
     this.logger = logger;
     this.getRoutes = getRoutes;
     this.handlers = handlers;
-    this.auth = auth;
   }
 
 
@@ -57,7 +56,7 @@ class Express extends EventEmitter {
       this.app.use(cors());
 
       this.app.use(this.handlers.logging);
-      this.app.use('/', this.auth, routes);
+      this.app.use('/', routes);
       this.app.use(this.handlers.error);
 
       await this.registerHttpServer();

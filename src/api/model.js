@@ -11,14 +11,19 @@ const DeviceSchema = new Schema({
     type: Date,
     required: true
   },
+  thresholdHumidity: {
+    required: true,
+    type: String
+  },
+  thresholdTemperature: {
+    required: true,
+    type: String
+  },
   deviceId: {
     unique: true,
     required: true,
-    type: [String]
+    type: String
   }
-}, {
-  timestamps: true,
-  strict: false
 });
 
 const UserSchema = new Schema({
@@ -26,6 +31,10 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     unique: true
+  },
+  phone: {
+    type: String,
+    required: true
   },
   name: {
     type: String,
@@ -42,8 +51,8 @@ const UserSchema = new Schema({
   avatar: {
     type: String
   },
-  deviceIds: {
-    type: [DeviceSchema],
+  device: {
+    type: DeviceSchema,
     required: true
   }
 }, {
@@ -52,6 +61,5 @@ const UserSchema = new Schema({
 });
 
 module.exports =  {
-  User: model('users', UserSchema),
-  Device: model('devices', DeviceSchema)
+  User: model('users', UserSchema)
 };
