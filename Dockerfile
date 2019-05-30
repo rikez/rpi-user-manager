@@ -18,7 +18,7 @@ RUN npm install --only=production
 # Release
 FROM node:10-stretch-slim AS release
 
-WORKDIR /usr/bin/call-record-worker/
+WORKDIR /usr/bin/rpi-user-manager/
 
 COPY . .
 COPY --from=dependencies  /app/node_modules ./node_modules/
@@ -27,4 +27,4 @@ RUN apt-get update -y && \
     apt-get install -y tzdata && \
     apt-get install -y ca-certificates && update-ca-certificates
 
-CMD ["node", "/usr/bin/user-manager/src/index.js"]
+CMD ["node", "/usr/bin/rpi-user-manager/src/index.js"]
