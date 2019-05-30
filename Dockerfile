@@ -26,4 +26,4 @@ RUN apt-get update -y && \
     apt-get install -y tzdata && \
     apt-get install -y ca-certificates && update-ca-certificates
 
-CMD ["node", "/usr/bin/rpi-user-manager/src/index.js"]
+CMD ["node", "/usr/bin/rpi-user-manager/bin/index.js"]
